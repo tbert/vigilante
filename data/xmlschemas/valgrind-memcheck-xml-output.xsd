@@ -1,0 +1,292 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+
+  <xs:element name="valgrindoutput">
+    <xs:complexType>
+      <xs:sequence>
+
+        <xs:element ref="protocolversion"/>
+        <xs:element ref="protocoltool"/>
+        <xs:element ref="preamble"/>
+        <xs:element ref="pid"/>
+        <xs:element ref="ppid"/>
+        <xs:element ref="tool"/>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="logfilequalifier"/>
+        <xs:element minOccurs="0" maxOccurs="1" ref="usercomment"/>
+        <xs:element ref="args"/>
+
+        <xs:element ref="status"/>
+
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+          <xs:element ref="error"/>
+          <xs:element ref="errorcounts"/>
+        </xs:choice>
+
+        <xs:element ref="status"/>
+
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+          <xs:element ref="error"/>
+          <xs:element ref="errorcounts"/>
+        </xs:choice>
+
+        <xs:element ref="suppcounts"/>
+
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="protocolversion">
+    <xs:simpleType>
+      <xs:restriction base="xs:integer">
+        <xs:minInclusive value="4"/>
+        <xs:maxInclusive value="4"/>
+      </xs:restriction>
+    </xs:simpleType>
+  </xs:element>
+
+  <xs:element name="protocoltool">
+    <xs:simpleType>
+      <xs:restriction base="xs:NCName">
+        <xs:enumeration value="memcheck"/>
+      </xs:restriction>
+    </xs:simpleType>
+  </xs:element>
+
+  <xs:element name="preamble">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="line"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="line" type="xs:string"/>
+
+  <xs:element name="pid" type="xs:integer"/>
+  <xs:element name="ppid" type="xs:integer"/>
+  <xs:element name="tool" type="xs:NCName"/>
+
+  <xs:element name="logfilequalifier">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="var" type="xs:NCName"/>
+        <xs:element name="value" type="xs:string"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="usercomment" type="xs:string"/>
+
+  <xs:element name="args">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="vargv"/>
+        <xs:element ref="argv"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="vargv">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="exe"/>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="arg"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="argv">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="exe"/>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="arg"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="arg" type="xs:string"/>
+  <xs:element name="exe" type="xs:string"/>
+
+  <xs:element name="error">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="unique"/>
+        <xs:element ref="tid"/>
+        <xs:element ref="kind"/>
+
+        <xs:choice minOccurs="1" maxOccurs="2">
+          <xs:element ref="what"/>
+          <xs:element ref="xwhat"/>
+        </xs:choice>
+
+        <xs:element ref="stack"/>
+
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+          <xs:element ref="auxwhat"/>
+          <xs:element ref="xauxwhat"/>
+          <xs:element ref="stack"/>
+        </xs:choice>
+
+        <xs:element minOccurs="0" maxOccurs="1" ref="suppression"/>
+
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="tid" type="xs:integer"/>
+  <xs:element name="kind">
+    <xs:simpleType>
+      <xs:restriction base="xs:NCName">
+        <xs:enumeration value="InvalidFree"/>
+        <xs:enumeration value="MismatchedFree"/>
+        <xs:enumeration value="InvalidRead"/>
+        <xs:enumeration value="InvalidWrite"/>
+        <xs:enumeration value="InvalidJump"/>
+        <xs:enumeration value="Overlap"/>
+        <xs:enumeration value="InvalidMemPool"/>
+        <xs:enumeration value="UninitCondition"/>
+        <xs:enumeration value="UninitValue"/>
+        <xs:enumeration value="SyscallParam"/>
+        <xs:enumeration value="ClientCheck"/>
+        <xs:enumeration value="Leak_DefinitelyLost"/>
+        <xs:enumeration value="Leak_IndirectlyLost"/>
+        <xs:enumeration value="Leak_PossiblyLost"/>
+        <xs:enumeration value="Leak_StillReachable"/>
+      </xs:restriction>
+    </xs:simpleType>
+  </xs:element>
+
+  <xs:element name="what" type="xs:string"/>
+  <xs:element name="auxwhat" type="xs:string"/>
+
+  <xs:element name="xwhat">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="text"/>
+        <xs:element minOccurs="0" ref="leakedbytes"/>
+        <xs:element minOccurs="0" ref="leakedblocks"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="text" type="xs:string"/>
+  <xs:element name="leakedbytes" type="xs:integer"/>
+  <xs:element name="leakedblocks" type="xs:integer"/>
+
+  <xs:element name="xauxwhat">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="text"/>
+        <xs:element ref="file"/>
+        <xs:element ref="line"/>
+        <xs:element ref="dir"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+
+  <xs:element name="stack">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="1" maxOccurs="unbounded" ref="frame"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="frame">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="ip"/>
+        <xs:element minOccurs="0" ref="obj"/>
+        <xs:element minOccurs="0" ref="fn"/>
+        <xs:element minOccurs="0" ref="dir"/>
+        <xs:element minOccurs="0" ref="file"/>
+        <xs:element minOccurs="0" ref="line"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="ip" type="xs:NMTOKEN"/>
+  <xs:element name="obj" type="xs:string"/>
+  <xs:element name="fn" type="xs:string"/>
+  <xs:element name="dir" type="xs:string"/>
+  <xs:element name="file" type="xs:NCName"/>
+
+  <xs:element name="suppression">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="sname"/>
+        <xs:element ref="skind"/>
+        <xs:element minOccurs="0" maxOccurs="1" ref="skaux"/>
+        <xs:element minOccurs="1" maxOccurs="unbounded" ref="sframe"/>
+        <xs:element ref="rawtext"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="sname" type="xs:NCName"/>
+  <xs:element name="skind" type="xs:NMTOKEN"/>
+  <xs:element name="skaux" type="xs:string"/>
+  <xs:element name="sframe">
+    <xs:complexType>
+      <xs:choice>
+        <xs:element ref="obj"/>
+        <xs:element ref="fun"/>
+      </xs:choice>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="fun" type="xs:string"/>
+  <xs:element name="rawtext" type="xs:string"/>
+
+  <xs:element name="status">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="state"/>
+        <xs:element ref="time"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="time" type="xs:NMTOKEN"/>
+  <xs:element name="state">
+    <xs:simpleType>
+      <xs:restriction base="xs:NCName">
+        <xs:enumeration value="RUNNING"/>
+        <xs:enumeration value="FINISHED"/>
+      </xs:restriction>
+    </xs:simpleType>
+  </xs:element>
+
+  <xs:element name="errorcounts">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="pair"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="suppcounts">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="pair"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="unique" type="xs:NMTOKEN"/>
+
+  <xs:element name="pair">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="count"/>
+        <xs:choice>
+          <xs:element ref="unique"/>
+          <xs:element ref="name"/>
+        </xs:choice>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="count" type="xs:integer"/>
+  <xs:element name="name" type="xs:NCName"/>
+
+</xs:schema>
+
+
+
