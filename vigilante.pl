@@ -20,6 +20,7 @@ use warnings;
 
 use Config::General qw(ParseConfig);
 use Storable qw(fd_retrieve);
+use Regexp::Assemble;
 use DBD::SQLite;
 use Data::UUID;
 use DBI;
