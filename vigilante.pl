@@ -25,13 +25,22 @@ use DBD::SQLite;
 use Data::UUID;
 use DBI;
 
-use lib "lib/";
+use lib "lib/";		# XXX -- for testing only!
 
 use Vigilante;
 
 use Data::Dumper;	# XXX -- for testing only!
 
 use feature "switch";
+
+sub parseconfig($$);
+sub parsereport();
+sub getprojectID($$);
+sub duplicateID($$$);
+sub createScan($$$$);
+sub uuid();
+sub skipsignature($);
+sub loadsignatures($);
 
 my $createProjects = 1;		# XXX -- 'true' default for testing only!
 
@@ -47,15 +56,6 @@ my $dbh;
 my $sth;
 my $sql;
 my $patch = undef;
-
-sub parseconfig($$);
-sub parsereport();
-sub getprojectID($$);
-sub duplicateID($$$);
-sub createScan($$$$);
-sub uuid();
-sub skipsignature($);
-sub loadsignatures($);
 
 $report = parsereport();
 parseconfig($confpath, $report);
