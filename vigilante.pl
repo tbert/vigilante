@@ -56,6 +56,7 @@ my $dbh;
 my $sth;
 my $sql;
 my $patch = undef;
+my $ra;
 
 $report = parsereport();
 parseconfig($confpath, $report);
@@ -238,13 +239,15 @@ sub uuid() {
 sub skipsignature($) {
 	my $raw = shift;
 
-	return 0;
+	return $ra->match($raw);
 }
 
 sub loadsignatures($) {
 	my $sigfile = shift;
 	my $sigfh;
-	my @sigs;
+	my $regex;
+
+	$regex = Regexp::Assemble->new();
 
 	open($sigfh, $sigfile) or die("could not open signature file: $sigfile");
 
@@ -253,10 +256,10 @@ sub loadsignatures($) {
 		next	if (/^$/);
 		next	if (/^#/);
 
-		push(@sigs, $_);
+		$regex->add($_);
 	}
 
 	close($sigfh);
 
-	return \@sigs;
+	return $regex;;
 }
