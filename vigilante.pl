@@ -119,14 +119,14 @@ sub parseconfig($$) {
 	my ($u, $p, $d, $l, $t) = (undef, undef, undef, undef, undef);
 
 	# XXX -- think about using -Tie to limit the keys?
-	$conf = new Config::General(
+	$conf = Config::General(
 			-ConfigFile       => $path,
 			-InterPolateVars  => 1,
 			-StrictVars       => 1,
 			-UseApacheInclude => 1,
 			-IncludeRelative  => 1,
 			-IncludeGlob      => 1,
-		) or die("Could not load configuration file $path");
+		)->new() or die("Could not load configuration file $path");
 
 	%confhash = $conf->getall();
 
@@ -232,7 +232,7 @@ sub createScan($$$$) {
 }
 
 sub uuid() {
-	my $uuid = new Data::UUID;
+	my $uuid = Data::UUID->new();
 	return $uuid->create_str();
 }
 
