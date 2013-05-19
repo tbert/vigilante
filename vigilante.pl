@@ -249,7 +249,7 @@ sub loadsignatures($) {
 
 	$regex = Regexp::Assemble->new();
 
-	open($sigfh, $sigfile) or die("could not open signature file: $sigfile");
+	open($sigfh, "<", $sigfile) or die("could not open signature file: $sigfile");
 
 	while (<$sigfh>) {
 		chomp;
