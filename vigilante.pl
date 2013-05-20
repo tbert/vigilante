@@ -180,7 +180,7 @@ sub parsereport() {
 
 	die("Report does not include project name")	  if (! defined($r->{"project"}));
 	die("Report does not include defects")		  if (@{$r->{"defects"}} <= 0);
-	die("Report does not include name scanning tool") if (! defined($r->{"tool"}));
+	die("Report does not include scanning tool name") if (! defined($r->{"tool"}));
 
 	$patch = $r->{"diff"}	if ($r->{"diff"});
 
@@ -228,7 +228,7 @@ sub createScan($$$$) {
 
 	$d->do($sql);
 
-	return $d->last_insert_id("", "", "", "");
+	return $d->last_insert_id("", "", "", "");	# XXX
 }
 
 sub uuid() {
@@ -261,5 +261,5 @@ sub loadsignatures($) {
 
 	close($sigfh);
 
-	return $regex;;
+	return $regex;
 }
