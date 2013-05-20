@@ -1,5 +1,8 @@
 package Vigilante::Defect;
 
+use strict;
+use warnings;
+
 sub new {
 	my($this, %cnf) = @_;
 	my $class = ref($this) || $this;
