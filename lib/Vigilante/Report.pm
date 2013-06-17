@@ -23,9 +23,9 @@ sub new() {
 			defects => undef
 		}, $class;
 
-	$self->{"tool"} = $cnf{"tool"}		if (defined($cnf{"tool"}));
-	$self->{"date"} = $cnf{"date"}		if (defined($cnf{"date"}));
-	$self->{"diff"} = $cnf{"diff"}		if (defined($cnf{"diff"}));
+	$self->{"tool"}    = $cnf{"tool"}	if (defined($cnf{"tool"}));
+	$self->{"date"}    = $cnf{"date"}	if (defined($cnf{"date"}));
+	$self->{"diff"}    = $cnf{"diff"}	if (defined($cnf{"diff"}));
 	$self->{"defects"} = $cnf{"defects"}	if (defined($cnf{"defects"}));
 
 	return $self;

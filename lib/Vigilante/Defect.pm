@@ -16,12 +16,12 @@ sub new {
 			raw         => ""
 		}, $class;
 
-	$self->{"errstr"} = $cnf{"errstr"}		if (defined($cnf{"errstr"}));
+	$self->{"errstr"}      = $cnf{"errstr"}		if (defined($cnf{"errstr"}));
 	$self->{"defect_line"} = $cnf{"defect_line"}	if (defined($cnf{"defect_line"}));
-	$self->{"file"}	 = $cnf{"file"}			if (defined($cnf{"file"}));
-	$self->{"lineno"} = $cnf{"lineno"}		if (defined($cnf{"lineno"}));
-	$self->{"type"} = $cnf{"type"}			if (defined($cnf{"type"}));
-	$self->{"raw"} = $cnf{"raw"}			if (defined($cnf{"raw"}));
+	$self->{"file"}	       = $cnf{"file"}		if (defined($cnf{"file"}));
+	$self->{"lineno"}      = $cnf{"lineno"}		if (defined($cnf{"lineno"}));
+	$self->{"type"}        = $cnf{"type"}		if (defined($cnf{"type"}));
+	$self->{"raw"}         = $cnf{"raw"}		if (defined($cnf{"raw"}));
 
 	return $self;
 }
