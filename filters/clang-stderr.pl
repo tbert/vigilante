@@ -82,13 +82,13 @@ while (<$errstream>) {
 		my $file = $2;
 		my $lineno = $3;
 		my $errstr = $4;
-		my $defect_line = $5;
+		my $line = $5;
 
 		$defect->set_raw($raw);
 		$defect->set_file($file);
 		$defect->set_lineno($lineno);
 		$defect->set_errstr($errstr);
-		$defect->set_defect_line($defect_line);
+		$defect->set_line($line);
 		$defect->set_class(errorclass($raw));
 
 		$input = substr($input, length($raw) + 1);

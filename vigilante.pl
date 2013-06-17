@@ -19,6 +19,7 @@ use strict;
 use warnings;
 
 use Storable qw(fd_retrieve);
+use String::ShellQuote;
 use Regexp::Assemble;
 use Config::Tiny;
 use DBD::SQLite;
@@ -41,6 +42,7 @@ sub createScan($$$$);
 sub uuid();
 sub skipsignature($);
 sub loadsignatures($);
+sub action($);
 
 my $createProjects = 1;		# XXX -- 'true' default for testing only!
 
@@ -60,6 +62,9 @@ my $patch = undef;
 my $ra;
 my $projectID;
 my $scanID;
+my @keymap;
+my $action;
+my $conf;
 
 $report = parsereport();
 parseconfig($confpath, $report);
@@ -108,6 +113,8 @@ foreach my $defect (@{$report->{"defects"}}) {
 
 		$sth->execute($scanID, $file, $lineno, $line, $raw, $dupID, $class);
 	}
+
+	action($defect)		if (defined($action));
 }
 
 if (defined($dbtype)) {
@@ -122,9 +129,7 @@ sub parseconfig($$) {
 	my $path = shift;
 	my $r = shift;
 	my $project = $r->{"project"};
-	my $conf;
-	my %confhash;
-	my ($u, $p, $d, $l, $t, $s) = (undef, undef, undef, undef, undef, undef);
+	my ($u, $p, $d, $l, $t, $s, $a) = (undef, undef, undef, undef, undef, undef, undef);
 
 	$conf = Config::Tiny->read($path) or die("Unable to parse $path: $!");
 
@@ -137,6 +142,7 @@ sub parseconfig($$) {
 	$t = $conf->{_}->{"database"}	if (defined($conf->{_}->{"database"}));
 	$l = $conf->{_}->{"location"}	if (defined($conf->{_}->{"location"}));
 	$s = $conf->{_}->{"skipfile"}	if (defined($conf->{_}->{"skipfile"}));
+	$a = $conf->{_}->{"action"}	if (defined($conf->{_}->{"action"}));
 
 	# grab project-specific configuration options
 	$u = $conf->{$project}->{"user"}	if (defined($conf->{$project}->{"user"}));
@@ -144,14 +150,17 @@ sub parseconfig($$) {
 	$t = $conf->{$project}->{"database"}	if (defined($conf->{$project}->{"database"}));
 	$l = $conf->{$project}->{"location"}	if (defined($conf->{$project}->{"location"}));
 	$s = $conf->{$project}->{"skipfile"}	if (defined($conf->{$project}->{"skipfile"}));
+	$a = $conf->{$project}->{"action"}	if (defined($conf->{$project}->{"action"}));
 
 	$dbuser = $u	if (defined($u));
 	$dbpass = $p	if (defined($p));
 	$dbtype = $t	if (defined($t));
 	$dbname = $l	if (defined($l));
+	$action = $a	if (defined($a));
 
 	die("Database location not provided")	if(defined($dbtype) && ! defined($dbname));
 
+	parseaction($action)		if (defined($action));
 	$ra = loadsignatures($s)	if (defined($s));
 }
 
@@ -246,4 +255,39 @@ sub loadsignatures($) {
 	close($sigfh);
 
 	return $regex;
+}
+
+sub parseaction($) {
+	my @words = ("file", "lineno", "class", "line");
+	my $index = 0;
+
+	$action = shift;
+
+	while (($index = index($action, '!', $index)) != -1) {
+
+		foreach my $word (@words) {
+			my $len = length($word);
+
+			if ($word eq substr($action, $index + 1, $len)) {
+				substr($action, $index, $len + 1, '%s');
+				push(@keymap, $word);
+				last;
+			}
+		}
+		$index++;
+	}
+}
+
+sub action($) {
+	my $defect = shift;
+	my @args;
+	my $command;
+
+	for my $key (@keymap) {
+		push(@args, $defect->{"$key"});
+	}
+
+	# XXX -- this input is completely unsanitized
+	$command = sprintf($action, @args);
+	system($command);
 }

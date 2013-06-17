@@ -8,20 +8,20 @@ sub new {
 	my $class = ref($this) || $this;
 
 	my $self = bless {
-			errstr      => "",
-			defect_line => "",
-			file        => "",
-			lineno      => "",
-			class       => "",
-			raw         => ""
+			errstr => "",
+			line   => "",
+			file   => "",
+			lineno => "",
+			class  => "",
+			raw    => ""
 		}, $class;
 
-	$self->{"errstr"}      = $cnf{"errstr"}		if (defined($cnf{"errstr"}));
-	$self->{"defect_line"} = $cnf{"defect_line"}	if (defined($cnf{"defect_line"}));
-	$self->{"file"}	       = $cnf{"file"}		if (defined($cnf{"file"}));
-	$self->{"lineno"}      = $cnf{"lineno"}		if (defined($cnf{"lineno"}));
-	$self->{"class"}       = $cnf{"class"}		if (defined($cnf{"class"}));
-	$self->{"raw"}         = $cnf{"raw"}		if (defined($cnf{"raw"}));
+	$self->{"errstr"} = $cnf{"errstr"}	if (defined($cnf{"errstr"}));
+	$self->{"line"}   = $cnf{"line"}	if (defined($cnf{"line"}));
+	$self->{"file"}	  = $cnf{"file"}	if (defined($cnf{"file"}));
+	$self->{"lineno"} = $cnf{"lineno"}	if (defined($cnf{"lineno"}));
+	$self->{"class"}  = $cnf{"class"}	if (defined($cnf{"class"}));
+	$self->{"raw"}    = $cnf{"raw"}		if (defined($cnf{"raw"}));
 
 	return $self;
 }
@@ -32,10 +32,10 @@ sub set_errstr($) {
 	$self->{"errstr"} = $errstr;
 }
 
-sub set_defect_line($) {
-	my ($self, $defect_line) = @_;
+sub set_line($) {
+	my ($self, $line) = @_;
 
-	$self->{"defect_line"} = $defect_line;
+	$self->{"line"} = $line;
 }
 
 sub set_file($) {

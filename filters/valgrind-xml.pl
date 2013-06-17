@@ -114,8 +114,8 @@ foreach my $key (keys %{$xmlhash}) {
 			$defect->set_lineno($lineno);
 			$defect->set_errstr($err->{"error"}->{"cho_what"}[0]->{"xwhat"}->{"text"});
 			$defect->set_class(errorclass($err->{"error"}->{"kind"}));
-			$defect->set_defect_line($backtrace);
-			$defect->set_raw("");			# XXX -- XML dump of just this defect?
+			$defect->set_line($backtrace);
+			$defect->set_raw("");		# XXX -- XML dump of just this defect?
 
 			$report->append($defect);
 		}
