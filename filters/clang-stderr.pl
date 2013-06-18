@@ -33,7 +33,7 @@ use Vigilante;
 
 use feature "switch";
 
-sub errortype($) {
+sub errorclass($) {
 	my $errstr = shift;
 
 	given ($errstr) {
@@ -89,7 +89,7 @@ while (<$errstream>) {
 		$defect->set_lineno($lineno);
 		$defect->set_errstr($errstr);
 		$defect->set_defect_line($defect_line);
-		$defect->set_type(errortype($raw));
+		$defect->set_class(errorclass($raw));
 
 		$input = substr($input, length($raw) + 1);
 		$input =~ s/^\s//;

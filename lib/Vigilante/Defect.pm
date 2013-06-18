@@ -12,7 +12,7 @@ sub new {
 			defect_line => "",
 			file        => "",
 			lineno      => "",
-			type        => "",
+			class       => "",
 			raw         => ""
 		}, $class;
 
@@ -20,7 +20,7 @@ sub new {
 	$self->{"defect_line"} = $cnf{"defect_line"}	if (defined($cnf{"defect_line"}));
 	$self->{"file"}	       = $cnf{"file"}		if (defined($cnf{"file"}));
 	$self->{"lineno"}      = $cnf{"lineno"}		if (defined($cnf{"lineno"}));
-	$self->{"type"}        = $cnf{"type"}		if (defined($cnf{"type"}));
+	$self->{"class"}       = $cnf{"class"}		if (defined($cnf{"class"}));
 	$self->{"raw"}         = $cnf{"raw"}		if (defined($cnf{"raw"}));
 
 	return $self;
@@ -50,10 +50,10 @@ sub set_lineno($) {
 	$self->{"lineno"} = $lineno;
 }
 
-sub set_type($) {
-	my ($self, $type) = @_;
+sub set_class($) {
+	my ($self, $class) = @_;
 
-	$self->{"type"} = $type;
+	$self->{"class"} = $class;
 }
 
 sub set_raw($) {

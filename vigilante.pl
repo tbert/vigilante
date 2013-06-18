@@ -93,7 +93,7 @@ foreach my $defect (@{$report->{"defects"}}) {
 	my $raw    = "NULL";
 	my $dupID  = "NULL";
 
-	$class  = $defect->{"type"}	if defined($defect->{"type"});
+	$class  = $defect->{"class"}	if defined($defect->{"class"});
 	$file   = $defect->{"file"}	if defined($defect->{"file"});
 	$lineno = $defect->{"lineno"}	if defined($defect->{"lineno"});
 	$line   = $defect->{"line"}	if defined($defect->{"line"});

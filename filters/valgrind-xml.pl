@@ -47,13 +47,13 @@ sub frameval($) {
 	}
 }
 
-sub errortype($) {
+sub errorclass($) {
 	my $errstr = shift;
 
 	given ($errstr) {
 		when (/Leak_/)		{ return "LEAK"; }
 		when ("SyscallParam")	{ return "INIT"; }
-		default			{ die("Unknown error type $errstr"); }
+		default			{ die("Unknown error class $errstr"); }
 	}
 }
 
@@ -113,7 +113,7 @@ foreach my $key (keys %{$xmlhash}) {
 			$defect->set_file($file);
 			$defect->set_lineno($lineno);
 			$defect->set_errstr($err->{"error"}->{"cho_what"}[0]->{"xwhat"}->{"text"});
-			$defect->set_type(errortype($err->{"error"}->{"kind"}));
+			$defect->set_class(errorclass($err->{"error"}->{"kind"}));
 			$defect->set_defect_line($backtrace);
 			$defect->set_raw("");			# XXX -- XML dump of just this defect?
 
