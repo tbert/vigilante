@@ -70,7 +70,7 @@ INSERT OR IGNORE INTO DefectClasses (textID, class, description) VALUES
 	), (
 		"TCTU",
 		"TOCTOU",
-		"There exists a race between the time data is checked and the time it is used"
+		"A race exists between the time data is checked and the time it is used"
 	), (
 		"UNTR",
 		"Untrusted input",
