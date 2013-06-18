@@ -37,12 +37,15 @@ sub errortype($) {
 	my $errstr = shift;
 
 	given ($errstr) {
-		when (/[Nn]ull pointer/) { return "NULL"; }
-		when (/never read/)	{ return "DEDS"; }
-		when (/never reached/)	{ return "DEDC"; }
-		when (/garbage/)	{ return "INIT"; }
-		when (/undefined/)	{ return "INIT"; }
-		default	{ die("Unknown error $errstr"); }
+		when (/Result .* converted .* incompatible/)	{ return "RTRN"; }
+		when (/[Uu]se .* after .* free/)		{ return "UAF";  }
+		when (/[Nn]ull pointer/)			{ return "NULL"; }
+		when (/never read/)				{ return "DEDS"; }
+		when (/never reached/)				{ return "DEDC"; }
+		when (/garbage/)				{ return "INIT"; }
+		when (/undefined/)				{ return "INIT"; }
+		when (/allocation size/)			{ return "UNTR"; }
+		default			{ die("Undefined defect class for $errstr"); }
 	}
 }
 
@@ -72,6 +75,7 @@ while (<$errstream>) {
 	$input =~ s/[0-9]+ warnings? generated\.//g;
 
 	while ($input =~ /((.*):([0-9]+):[0-9]+: warning: (.*)\n(.*)\n)/) {
+
 		my $defect = Vigilante::Defect->new();
 
 		my $raw = $1;
