@@ -124,7 +124,7 @@ sub parseconfig($$) {
 	my $project = $r->{"project"};
 	my $conf;
 	my %confhash;
-	my ($u, $p, $d, $l, $t) = (undef, undef, undef, undef, undef);
+	my ($u, $p, $d, $l, $t, $s) = (undef, undef, undef, undef, undef, undef);
 
 	$conf = Config::Tiny->read($path) or die("Unable to parse $path: $!");
 
@@ -136,12 +136,14 @@ sub parseconfig($$) {
 	$p = $conf->{_}->{"pass"}	if (defined($conf->{_}->{"pass"}));
 	$t = $conf->{_}->{"database"}	if (defined($conf->{_}->{"database"}));
 	$l = $conf->{_}->{"location"}	if (defined($conf->{_}->{"location"}));
+	$s = $conf->{_}->{"skipfile"}	if (defined($conf->{_}->{"skipfile"}));
 
 	# grab project-specific configuration options
 	$u = $conf->{$project}->{"user"}	if (defined($conf->{$project}->{"user"}));
 	$p = $conf->{$project}->{"pass"}	if (defined($conf->{$project}->{"pass"}));
 	$t = $conf->{$project}->{"database"}	if (defined($conf->{$project}->{"database"}));
 	$l = $conf->{$project}->{"location"}	if (defined($conf->{$project}->{"location"}));
+	$s = $conf->{$project}->{"skipfile"}	if (defined($conf->{$project}->{"skipfile"}));
 
 	$dbuser = $u	if (defined($u));
 	$dbpass = $p	if (defined($p));
@@ -149,6 +151,8 @@ sub parseconfig($$) {
 	$dbname = $l	if (defined($l));
 
 	die("Database location not provided")	if(defined($dbtype) && ! defined($dbname));
+
+	$ra = loadsignatures($s)	if (defined($s));
 }
 
 sub parsereport() {
