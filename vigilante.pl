@@ -18,9 +18,9 @@
 use strict;
 use warnings;
 
-use Config::General qw(ParseConfig);
 use Storable qw(fd_retrieve);
 use Regexp::Assemble;
+use Config::Tiny;
 use DBD::SQLite;
 use Data::UUID;
 use DBI;
@@ -44,42 +44,46 @@ sub loadsignatures($);
 
 my $createProjects = 1;		# XXX -- 'true' default for testing only!
 
-my $dbname = "vigilante.db";
-my $dbtype = "SQLite";
-my $dbuser = "";
-my $dbpass = "";
+my $dbname;
+my $dbtype;
+my $dbuser;
+my $dbpass;
 
 my $confpath = "./vigilante.conf";	# XXX
 my %config;
 my $report;
 my $dbh;
 my $sth;
+my $dupsth;
 my $sql;
 my $patch = undef;
 my $ra;
+my $projectID;
+my $scanID;
 
 $report = parsereport();
 parseconfig($confpath, $report);
 
-$dbh = DBI->connect("dbi:$dbtype:dbname=$dbname", $dbuser, $dbpass,
-                    { RaiseError => 0, AutoCommit => 0});
+if (defined($dbtype)) {
+	$dbh = DBI->connect("dbi:$dbtype:dbname=$dbname", $dbuser, $dbpass,
+			    { RaiseError => 0, AutoCommit => 0});
 
-my $dupsth;
-my $projectID = getprojectID($dbh, $report->{"project"});
-my $scanID = createScan($dbh, $projectID, $report->{"tool"}, "");
+	$projectID = getprojectID($dbh, $report->{"project"});
+	$scanID = createScan($dbh, $projectID, $report->{"tool"}, "");
 
-$sql  = "INSERT INTO Defects (scanID, file, lineno, line, raw, duplicateOf, classID) ";
-$sql .= "SELECT ?,?,?,?,?,?,(SELECT ID from DefectClasses where textID = ?)";
+	$sql  = "INSERT INTO Defects (scanID, file, lineno, line, raw, duplicateOf, classID) ";
+	$sql .= "SELECT ?,?,?,?,?,?,(SELECT ID from DefectClasses where textID = ?)";
 
-$sth = $dbh->prepare($sql);
+	$sth = $dbh->prepare($sql);
 
-$sql  = "SELECT Defects.ID as defectID, Defects.duplicateOf as dupID FROM Defects ";
-$sql .= "JOIN Scans ON Defects.scanID = Scans.ID ";
-$sql .= "JOIN Projects ON Scans.projectID = Projects.ID ";
-$sql .= "WHERE Defects.line = ? ";
-$sql .= "AND Projects.ID = ?";
+	$sql  = "SELECT Defects.ID as defectID, Defects.duplicateOf as dupID FROM Defects ";
+	$sql .= "JOIN Scans ON Defects.scanID = Scans.ID ";
+	$sql .= "JOIN Projects ON Scans.projectID = Projects.ID ";
+	$sql .= "WHERE Defects.line = ? ";
+	$sql .= "AND Projects.ID = ?";
 
-$dupsth = $dbh->prepare($sql);
+	$dupsth = $dbh->prepare($sql);
+}
 
 foreach my $defect (@{$report->{"defects"}}) {
 	my $class  = "NULL";
@@ -97,15 +101,19 @@ foreach my $defect (@{$report->{"defects"}}) {
 
 	next	if (skipsignature($defect->{"raw"}));
 
-	if (defined($patch) and $file ne "NULL" and $lineno ne "NULL") {
-		$dupID = duplicateID($dupsth, $file, $lineno);
-	}
+	if (defined($dbtype)) {
+		if (defined($patch) and $file ne "NULL" and $lineno ne "NULL") {
+			$dupID = duplicateID($dupsth, $file, $lineno);
+		}
 
-	$sth->execute($scanID, $file, $lineno, $line, $raw, $dupID, $class);
+		$sth->execute($scanID, $file, $lineno, $line, $raw, $dupID, $class);
+	}
 }
 
-$dbh->commit();
-$dbh->disconnect();
+if (defined($dbtype)) {
+	$dbh->commit();
+	$dbh->disconnect();
+}
 
 exit 0;
 
@@ -118,61 +126,29 @@ sub parseconfig($$) {
 	my %confhash;
 	my ($u, $p, $d, $l, $t) = (undef, undef, undef, undef, undef);
 
-	# XXX -- think about using -Tie to limit the keys?
-	$conf = Config::General(
-			-ConfigFile       => $path,
-			-InterPolateVars  => 1,
-			-StrictVars       => 1,
-			-UseApacheInclude => 1,
-			-IncludeRelative  => 1,
-			-IncludeGlob      => 1,
-		)->new() or die("Could not load configuration file $path");
+	$conf = Config::Tiny->read($path) or die("Unable to parse $path: $!");
 
-	%confhash = $conf->getall();
+	die("Undefined project")		if (! defined($project));
+	die("Unknown project '$project'")	if (! defined($conf->{$project}));
 
 	# grab default options from config file
-	$u = $confhash{"user"}		if (defined($confhash{"user"}));
-	$p = $confhash{"pass"}		if (defined($confhash{"pass"}));
-	$t = $confhash{"database"}	if (defined($confhash{"database"}));
-	$l = $confhash{"location"}	if (defined($confhash{"location"}));
-
-	my $pconf = $confhash{"project"}->{$project};
+	$u = $conf->{_}->{"user"}	if (defined($conf->{_}->{"user"}));
+	$p = $conf->{_}->{"pass"}	if (defined($conf->{_}->{"pass"}));
+	$t = $conf->{_}->{"database"}	if (defined($conf->{_}->{"database"}));
+	$l = $conf->{_}->{"location"}	if (defined($conf->{_}->{"location"}));
 
 	# grab project-specific configuration options
-	if (defined($pconf)) {
-		if (defined($pconf->{"database"})) {
-
-			# unpack the hash, or assign the scalar
-			if (ref($pconf->{"database"}) eq "HASH") {
-				my @k = keys(%{$pconf->{"database"}});
-
-				die("Multiple database definitions for $project") if (@k > 1);
-
-				given ($k[0]) {
-					when ("MySQL")		{ $t = "mysql" }
-					when ("SQLite")		{ $t = "SQLite" }
-					when ("PostgreSQL")	{ $t = "Pg" }
-					default {
-						die("Unknown database type $k[0]");
-					}
-				}
-
-				$u = $pconf->{"database"}->{$k[0]}->{"user"}
-				    if (defined($pconf->{"database"}->{$k[0]}->{"user"}));
-				$p = $pconf->{"database"}->{$k[0]}->{"pass"}
-				    if (defined($pconf->{"database"}->{$k[0]}->{"pass"}));
-				$l = $pconf->{"database"}->{$k[0]}->{"line"}
-				    if (defined($pconf->{"database"}->{$k[0]}->{"location"}));
-			} else {
-				$t = $pconf->{"database"};
-			}
-		}
-	}
+	$u = $conf->{$project}->{"user"}	if (defined($conf->{$project}->{"user"}));
+	$p = $conf->{$project}->{"pass"}	if (defined($conf->{$project}->{"pass"}));
+	$t = $conf->{$project}->{"database"}	if (defined($conf->{$project}->{"database"}));
+	$l = $conf->{$project}->{"location"}	if (defined($conf->{$project}->{"location"}));
 
 	$dbuser = $u	if (defined($u));
 	$dbpass = $p	if (defined($p));
 	$dbtype = $t	if (defined($t));
 	$dbname = $l	if (defined($l));
+
+	die("Database location not provided")	if(defined($dbtype) && ! defined($dbname));
 }
 
 sub parsereport() {
