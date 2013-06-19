@@ -215,7 +215,11 @@ sub uuid() {
 sub skipsignature($) {
 	my $raw = shift;
 
-	return $ra->match($raw);
+	if (defined($ra)) {
+		return $ra->match($raw);
+	} else {
+		return 0;
+	}
 }
 
 sub loadsignatures($) {
